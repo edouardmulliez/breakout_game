@@ -1,22 +1,40 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Breakout</title>
-        <link rel="stylesheet" type="text/css" href="breakout.css" media="screen" />
-    </head>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Deactivate zoom on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Breakout</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="breakout.css" media="screen" />
+    <!-- For animated score counter -->
+    <link rel="stylesheet" href="http://github.hubspot.com/odometer/themes/odometer-theme-car.css" />
+    <script src="http://github.hubspot.com/odometer/odometer.js"></script>
+  </head>
 
-    <body>
-        <div id="centered">
-            <canvas id="breakoutCanvas"></canvas>
-            <div>
-                <button id="startButton">Start a new game</button>            
-            </div>
+  <body>
+
+    <div class="container" style="max-width: 600px;">
+      <div class="row">
+        <div class="col-md-1"></div>   
+        <div class="col-md-10">
+          <div class="row">
+            <canvas id="breakoutCanvas" width="500" height="500">
+            Sorry, your browser doesn't support the &lt;canvas&gt; element.
+            </canvas>
+            <div id="score" class="odometer">123</div>
+          </div>
+          <div class="row">
+            <button id="startButton">Start a new game</button>
+          </div>
         </div>
+        <div class="col-md-1"></div>
+      </div>
+    </div>
 
-
-        <script src="breakout.js"></script>
-    </body>
+    <script src="levels.js"></script>
+    <script src="breakout.js"></script>
+  </body>
 </html>
 
 

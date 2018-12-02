@@ -1,17 +1,59 @@
 #centered {
-    margin-left: auto;
-    margin-right: auto;
-    width: 500px;    
+  margin-left: auto;
+  margin-right: auto;
+  width: 500px;  
 }
 
 #breakoutCanvas {
-    height: 300px;
-    width: 300px;
-    border: 1px solid black;
-    background-color: white;
-    cursor: pointer;
+  /* height: 300px;
+  width: 300px; */
+  border: 1px solid black;
+  background-color: white;
+  cursor: pointer;
+  width: 100%;
+  height: auto;
+}
+
+/* Prevent selection (highlighting) of canvas */
+canvas {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  outline: none;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0); /* mobile webkit */
 }
 
 body {
-    background-color: gainsboro;
+  background-color: gainsboro;
 }
+
+/** Setting odometer counter speed: https://github.com/HubSpot/odometer/issues/91 
+ *  We make the transitions in 0.5s here.
+ */
+.odometer.odometer-animating-up .odometer-ribbon-inner, .odometer.odometer-animating-down.odometer-animating .odometer-ribbon-inner {
+  -webkit-transition-duration: 0.5s !important;
+  -moz-transition-duration: 0.5s !important;
+  -ms-transition-duration: 0.5s !important;
+  -o-transition-duration: 0.5s !important;
+  transition-duration: 0.5s !important
+}
+
+/* Hack to have leading zeros in odometer: https://github.com/HubSpot/odometer/issues/106 */
+/* Remove 1st character */
+.odometer .odometer-inside .odometer-digit:first-child{
+  display: none
+}
+  
+#score {
+  position: absolute;
+  top: 2%;
+  right: 5%;
+  pointer-events: none;
+}
+
+
+
+
