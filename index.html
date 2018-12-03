@@ -7,31 +7,55 @@
     <title>Breakout</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="breakout.css" media="screen" />
-    <!-- For animated score counter -->
-    <link rel="stylesheet" href="https://github.hubspot.com/odometer/themes/odometer-theme-car.css" />
-    <script src="https://github.hubspot.com/odometer/odometer.js"></script>
   </head>
 
   <body>
 
-    <div class="container" style="max-width: 600px;">
-      <div class="row">
-        <div class="col-md-1"></div>   
-        <div class="col-md-10">
-          <div class="row">
-            <canvas id="breakoutCanvas" width="500" height="500">
-            Sorry, your browser doesn't support the &lt;canvas&gt; element.
-            </canvas>
-            <div id="score" class="odometer">123</div>
-          </div>
-          <div class="row">
-            <button id="startButton">Start a new game</button>
+    <div class="container" style="max-width: 500px;">
+      <div class="row" id="canvasContainer">
+        <canvas id="breakoutCanvas" width="500" height="500">
+        Sorry, your browser doesn't support the &lt;canvas&gt; element.
+        </canvas>
+        <div id="instructions">
+          <span class='verticalCenter'>
+            Select your <b>level</b> and <b>speed</b> below <br>
+            <b>Click/touch</b> inside the game to start
+          </span>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="speed" class="col-sm-4 col-sm-offset-2 col-form-label">Ball speed</label>
+        <div class="col-sm-4">
+          <select class="form-control" id="speed">
+            <OPTION>Slow
+            <OPTION selected="selected">Normal
+            <OPTION>Fast
+          </select>
+        </div>
+      </div>
+      <div class="form-group row">
+          <label for="level" class="col-sm-4 col-sm-offset-2 col-form-label">Level</label>
+          <div class="col-sm-4">
+            <select class="form-control" id="level">
+              <OPTION>1
+              <OPTION>2
+              <OPTION>3
+              <OPTION>4
+              <OPTION>5
+              <OPTION>6
+              <OPTION>7
+              <OPTION>8
+              <OPTION>9
+            </select>
           </div>
         </div>
-        <div class="col-md-1"></div>
-      </div>
+  
+      <!-- <div class="row">
+        <button id="startButton" class="col-sm-6 col-sm-offset-3 col-form-button">Start a new game</button>
+      </div> -->
     </div>
 
+    <script src="utils.js"></script>
     <script src="levels.js"></script>
     <script src="breakout.js"></script>
   </body>

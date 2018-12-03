@@ -1,11 +1,51 @@
 
 var canvas = document.getElementById('breakoutCanvas');
 var ctx = canvas.getContext('2d');
-var startButton = document.getElementById("startButton");
+// var startButton = document.getElementById("startButton");
+var speedSelect = document.getElementById("speed");
+var levelSelect = document.getElementById("level");
 
-var heartImg = new Image();
-heartImg.src = 'images/heart.png';
+function disableControls(){
+  levelSelect.disabled = true;
+  speedSelect.disabled = true;
+  // startButton.disabled = true;
+}
+function enableControls(){
+  levelSelect.disabled = false;
+  speedSelect.disabled = false;
+  // startButton.disabled = false;
+}
 
+function hideInstruction(){
+  document.getElementById("instructions").classList.add("hidden");
+}
+function showInstruction(){
+  document.getElementById("instructions").classList.remove("hidden");
+}
+
+var Settings = {
+  fillStyle: {
+    ball: '#aa0308',
+    wall: '#283747',
+    score: '#d69a02',
+    lives: '#d69a02',
+    level: '#d69a02',
+    board: 'black'
+  },
+  font: {
+    level: '18px Arial',
+    score: 'bold 18px Arial'
+  },
+
+  ball: {
+    speed: {
+      slow: 1.5,
+      normal: 2,
+      fast: 3.2
+    }
+  }
+
+};
 
 
 class Ball {
@@ -19,6 +59,17 @@ class Ball {
     this.y = canvas.height / 2;
   }
 
+  /**
+   * 
+   * @param {String} speed any of 'easy', 'normal', 'hard'
+   */
+  updateSpeed(speed) {
+    this.speed = Settings.ball.speed[speed];
+    if (this.speed === undefined) {
+      this.speed = Settings.ball.speed.normal;
+    }
+  }
+
   resetSpeed() {
     // Angle between -Pi/4 and - 3 Pi/4
     var angle = -Math.PI * (1/4 + 1/2 * Math.random());
@@ -30,70 +81,9 @@ class Ball {
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.R, 0, 2 * Math.PI, false);
     ctx.lineWidth = 3;
-    ctx.fillStyle = '#FF0000';
+    ctx.fillStyle = Settings.fillStyle.ball;
     ctx.fill();
   }
-}
-
-
-/**
- * This code was copied from https://stackoverflow.com/questions/1255512/how-to-draw-a-rounded-rectangle-on-html-canvas
- * Draws a rounded rectangle using the current state of the canvas.
- * If you omit the last three params, it will draw a rectangle
- * outline with a 5 pixel border radius
- * @param {CanvasRenderingContext2D} ctx
- * @param {Number} x The top left x coordinate
- * @param {Number} y The top left y coordinate
- * @param {Number} width The width of the rectangle
- * @param {Number} height The height of the rectangle
- * @param {Number} [radius = 5] The corner radius; It can also be an object 
- *         to specify different radii for corners
- * @param {Number} [radius.tl = 0] Top left
- * @param {Number} [radius.tr = 0] Top right
- * @param {Number} [radius.br = 0] Bottom right
- * @param {Number} [radius.bl = 0] Bottom left
- * @param {Boolean} [fill = false] Whether to fill the rectangle.
- * @param {Boolean} [stroke = true] Whether to stroke the rectangle.
- */
-function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
-  if (typeof stroke == 'undefined') {
-  stroke = true;
-  }
-  if (typeof radius === 'undefined') {
-  radius = 5;
-  }
-  if (typeof radius === 'number') {
-  radius = {tl: radius, tr: radius, br: radius, bl: radius};
-  } else {
-  var defaultRadius = {tl: 0, tr: 0, br: 0, bl: 0};
-  for (var side in defaultRadius) {
-    radius[side] = radius[side] || defaultRadius[side];
-  }
-  }
-  ctx.beginPath();
-  ctx.moveTo(x + radius.tl, y);
-  ctx.lineTo(x + width - radius.tr, y);
-  ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
-  ctx.lineTo(x + width, y + height - radius.br);
-  ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
-  ctx.lineTo(x + radius.bl, y + height);
-  ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
-  ctx.lineTo(x, y + radius.tl);
-  ctx.quadraticCurveTo(x, y, x + radius.tl, y);
-  ctx.closePath();
-  if (fill) {
-  ctx.fill();
-  }
-  if (stroke) {
-  ctx.stroke();
-  }
-}
-
-function rotateVector(x, y, angle){
-  return {
-    x: x * Math.cos(angle) - y * Math.sin(angle),
-    y: x * Math.sin(angle) + y * Math.cos(angle)
-  };
 };
 
 class Board {
@@ -109,8 +99,8 @@ class Board {
   }
 
   draw(ctx) {
-    ctx.fillStyle = 'black';
-    roundRect(ctx, this.x - this.width / 2, this.y - this.height / 2, this.width, this.height, 3, true, false);
+    ctx.fillStyle = Settings.fillStyle.board;
+    Utils.roundRect(ctx, this.x - this.width / 2, this.y - this.height / 2, this.width, this.height, 3, true, false);
   }
 
   isInBoard(x, y) {
@@ -136,7 +126,7 @@ class Board {
         deviation = newAngle - currentAngle;
       }
 
-      var speed = rotateVector(ball.dx, ball.dy, deviation);
+      var speed = Utils.rotateVector(ball.dx, ball.dy, deviation);
       ball.dx = speed.x;
       ball.dy = speed.y;
     }
@@ -145,7 +135,6 @@ class Board {
   setX(x) {
     this.x = Math.max(this.xMin, Math.min(x, this.xMax)); 
   }
-
 };
 
 class Brick {
@@ -195,13 +184,14 @@ class Brick {
     }
     return false;
   }
-}
+};
 
 var STATE = {
-  "BEFORE_LAUNCH": 1,
-  "AFTER_LAUNCH": 2,
-  "FINISHED": 3
-}
+  "LEVEL_CHOICE": 1,
+  "BEFORE_LAUNCH": 2,
+  "AFTER_LAUNCH": 3,
+  "FINISHED": 4
+};
 
 function updateStates(g) {
 
@@ -228,13 +218,13 @@ function updateStates(g) {
       for(var j = 0; j < g.bricks[i].length; j++){
         if (g.bricks[i][j].checkCollision(g.ball)) {
           g.nActiveBricks--;
-          g.score += 15;
+          g.score += 135;
           g.rerender = true;
         }
       }
     }
 
-    // check if all bricks are destroyed
+    // If all bricks are destroyed, go to next level
     if (g.nActiveBricks === 0) {
       updateLevel(g);
       initGameLevel(g);
@@ -250,10 +240,18 @@ function updateStates(g) {
       g.rerender = true;
       if (g.lives === 0){
         g.state = STATE.FINISHED;
+        showInstruction();
+        enableControls();
+        resetGame(g);
       } else {
         g.state = STATE.BEFORE_LAUNCH;
       }
     }
+  }
+
+  // Score with animation (increases progressively)
+  if (g.vscore < g.score) {
+    g.vscore = Math.min(g.score, g.vscore + 5); 
   }
 }
 
@@ -266,17 +264,10 @@ function updateLevel(g){
 
 function launchBall(){
   if (g.state === STATE.BEFORE_LAUNCH) {
+    disableControls();
     g.ball.resetSpeed();
     g.state = STATE.AFTER_LAUNCH;
   }
-}
-
-function bound(box) {
-  box.left   = box.x;
-  box.right  = box.x + box.w;
-  box.top    = box.y;
-  box.bottom = box.y + box.h;
-  return box;
 }
 
 function getPlayArea(canvas, widthRatio, heightRatio) {
@@ -297,7 +288,10 @@ function initGame() {
 
   var area = getPlayArea(canvas, AREA_RATIO.x, AREA_RATIO.y);
   var boardHeight = area.height / 40;
-  var ball = new Ball(boardHeight/2, area.width / 250);
+
+  var speed = Settings.ball.speed.normal;
+
+  var ball = new Ball(boardHeight/2, speed * area.width / 250);
   
   var board = new Board(
     area.left + area.width / 2,
@@ -321,16 +315,21 @@ function initGame() {
 }
 
 function resetGame(g){
+
+  // Getting speed and level from controls
+  var level = document.getElementById("level").value
+  var speed = document.getElementById("speed").value.toLowerCase()
+
+  g.level = parseInt(level);
+  g.ball.updateSpeed(speed);
   g.lives  = 3;
-  g.score  =  0;
+  g.score  = 0;
+  g.vscore = 0;
   initGameLevel(g);
 }
 
 function initGameLevel(g){
   var unit = g.area.width / Breakout.unitPerRow;
-
-  // // Choose a random level
-  // g.level = Math.floor(Math.random()*Breakout.Levels.length + 1);
 
   var layout = Breakout.Levels[g.level-1];
   var nrow = layout.bricks.length;
@@ -375,20 +374,6 @@ function initGameLevel(g){
   g.intervalId = setInterval(animate, 10);
 }
 
-function renderToCanvas(width, height) {
-  var cachedCanvas = document.createElement('canvas');
-  cachedCanvas.width  = width;
-  cachedCanvas.height = height;
-  renderSlow(g, cachedCanvas.getContext('2d'));
-  return cachedCanvas;
-}
-
-function pad(num, size) {
-  var s = num+"";
-  while (s.length < size) s = "0" + s;
-  return s;
-}
-
 /**
  * Rendering elements that do not change often.
  * (Bricks, score, lives)
@@ -401,29 +386,31 @@ function renderSlow(g, ctx) {
     }
   }
   // walls
-  ctx.fillStyle = '#283747';
+  ctx.fillStyle = Settings.fillStyle.wall;
   ctx.fillRect(0, 0, g.area.left, g.area.bottom);
   ctx.fillRect(0, 0, canvas.width, g.area.top);
   ctx.fillRect(g.area.right, 0, g.area.left, g.area.bottom);
 
   // Lives
-  ctx.fillStyle = 'black';
-  ctx.font = "10px Arial";
-  ctx.fillText("x" + g.lives, canvas.width - 15, canvas.height - 2);
-  var heartSize = 8;
-  ctx.drawImage(heartImg, canvas.width - 25, canvas.height - 2 - heartSize, heartSize, heartSize);
-  // Score
-  displayScore(g.score);
+  ctx.fillStyle = Settings.fillStyle.lives;
+  var lifeItem = {width: g.area.width * 0.07, height: g.area.top * 0.2, xPad: g.area.width * 0.01};
+  for (var i=0; i<g.lives; i++){
+    Utils.roundRect(
+      ctx,
+      g.area.left + g.area.width * 0.25 + i * (lifeItem.width + lifeItem.xPad),
+      g.area.top/2 - lifeItem.height/2,
+      lifeItem.width,
+      lifeItem.height, 
+      2, 
+      true);
+  }
 
-}
-
-window.odometerOptions = {
-  format: '(,ddd).ddd'
-};
-
-function displayScore(score){
-  var size = 7;
-  document.getElementById("score").innerHTML = score + Math.pow(10, size);
+  // Current level
+  ctx.fillStyle = Settings.fillStyle.level;
+  ctx.font = Settings.font.level;
+  ctx.textAlign="end";
+  ctx.textBaseline = 'middle';
+  ctx.fillText("Level "+ Utils.pad(g.level,2), g.area.right, g.area.top/2);
 }
 
 /**
@@ -433,16 +420,25 @@ function displayScore(score){
 function renderFast(g, ctx) {
   g.ball.draw(ctx);
   g.board.draw(ctx);
+  // Score
+  ctx.fillStyle = Settings.fillStyle.score;
+  ctx.font = "bold 18px Arial";
+  ctx.textBaseline = 'middle';
+  ctx.fillText(Utils.pad(g.vscore, 7), g.area.left, g.area.top/2);
 }
 
 function drawGame(g){
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   // Use cached canvas if possible
   if (g.rerender) {
-    g.canvas = renderToCanvas(canvas.width, canvas.height);
+    g.cachedCanvas = Utils.renderToCanvas(
+      canvas.width, 
+      canvas.height,
+      function(ctx){renderSlow(g, ctx);}
+    );
     g.rerender = false;
   }
-  ctx.drawImage(g.canvas, 0, 0, canvas.width, canvas.height);
+  ctx.drawImage(g.cachedCanvas, 0, 0, canvas.width, canvas.height);
   // Render fast moving elements
   renderFast(g, ctx);
 }
@@ -460,6 +456,7 @@ canvas.addEventListener('click', function(e){
   e.stopPropagation();
   
   if (g.state === STATE.BEFORE_LAUNCH){
+    hideInstruction();
     launchBall();
   }
 });
@@ -473,19 +470,9 @@ canvas.addEventListener('touchstart', function(e){
   }
 });
 
-function  getMousePos(canvas, evt) {
-  var rect = canvas.getBoundingClientRect(), // abs. size of element
-    scaleX = canvas.width / rect.width,  // relationship bitmap vs. element for X
-    scaleY = canvas.height / rect.height;  // relationship bitmap vs. element for Y  
-  return {
-    x: (evt.clientX - rect.left) * scaleX,   // scale mouse coordinates after they have
-    y: (evt.clientY - rect.top) * scaleY   // been adjusted to be relative to element
-  }
-}
-
 canvas.addEventListener("mousemove", function(e){
   // Update board position according to mouse position
-  var pos = getMousePos(canvas, e);
+  var pos = Utils.getMousePos(canvas, e);
   g.board.setX(pos.x);
 });
 
@@ -493,21 +480,24 @@ canvas.addEventListener("touchmove", function(e){
   // Update board position according to touch position
   e.preventDefault();
   var touch = e.changedTouches[0];
-  var pos = getMousePos(canvas, touch);
+  var pos = Utils.getMousePos(canvas, touch);
   g.board.setX(pos.x);
 });
 
-startButton.addEventListener("click", function(e){
+// startButton.addEventListener("click", function(e){
+//   resetGame(g);
+// });
+levelSelect.addEventListener("change", function(e){
   resetGame(g);
 });
-
+speedSelect.addEventListener("change", function(e){
+  resetGame(g);
+});
 
 
 /**
  * TODO: 
  *    - cleaning: put functions, variables, ... in a single struct
- *    - Add indications on how to play
- *    - Add ability to choose level at beginning 
  * 
  * 
  */

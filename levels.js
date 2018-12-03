@@ -49,6 +49,38 @@ Breakout.Colors = {
 Breakout.unitPerRow = 30;
 Breakout.Levels = [
 
+    { colors: {
+        r: '#D80000', // red
+        b: '#706800', // brown
+        o: '#F8AB00', // orange
+        f: '#F83800', // fire
+        w: '#FFFFFF', // white
+        e: '#FFE0A8'  // beige
+        },
+
+        bricks: [
+        "",
+        "    rRrRr                     ",
+        "   RrRrRrRrR                  ",
+        "   BbBoObo                    ",
+        "  boboOoboOo       F    f   f ",
+        "  bobBoOoboOo     f e         ",
+        "  bBoOoObBbB       F  f     e ",
+        "    oOoOoOo        Ff      E  ",
+        "   bBrbBb        E  f fF F  f ",
+        "  bBbrbBrbBb       FfFfFf  F  ",
+        " bBbBrRrRbBbB     fFeFeFfFf   ",
+        " oObrorRorboO    FfEeEeEfF    ",
+        " oOorRrRrRoOo    FeEeWwEeFf   ",
+        " oOrRrRrRrRoO   fFeFwWfEeFf   ",
+        "   rRr  RrR     fFeFwWfEeFf   ",
+        "  bBb    bBb    fFeEwWeEeFf   ",
+        " bBbB    bBbB   fFfEeEeEfF    ",
+        "                 FfFfFfFfF    ",
+        "                   FfFfF      "
+        ]
+    },
+
     { colors: Breakout.Colors.pastel,
         bricks: [
         "", "", "", "", "", "",
@@ -232,39 +264,5 @@ Breakout.Levels = [
         "                              ",
         "                              ",
         ]
-    },
-
-    { colors: {
-        r: '#D80000', // red
-        b: '#706800', // brown
-        o: '#F8AB00', // orange
-        f: '#F83800', // fire
-        w: '#FFFFFF', // white
-        e: '#FFE0A8'  // beige
-        },
-
-        bricks: [
-        "",
-        "    rRrRr                     ",
-        "   RrRrRrRrR                  ",
-        "   BbBoObo                    ",
-        "  boboOoboOo       F    f   f ",
-        "  bobBoOoboOo     f e         ",
-        "  bBoOoObBbB       F  f     e ",
-        "    oOoOoOo        Ff      E  ",
-        "   bBrbBb        E  f fF F  f ",
-        "  bBbrbBrbBb       FfFfFf  F  ",
-        " bBbBrRrRbBbB     fFeFeFfFf   ",
-        " oObrorRorboO    FfEeEeEfF    ",
-        " oOorRrRrRoOo    FeEeWwEeFf   ",
-        " oOrRrRrRrRoO   fFeFwWfEeFf   ",
-        "   rRr  RrR     fFeFwWfEeFf   ",
-        "  bBb    bBb    fFeEwWeEeFf   ",
-        " bBbB    bBbB   fFfEeEeEfF    ",
-        "                 FfFfFfFfF    ",
-        "                   FfFfF      "
-        ]
     }
-
-
 ];
