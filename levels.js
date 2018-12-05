@@ -1,4 +1,4 @@
-var Breakout = {};
+// var Breakout = {};
 Breakout.Colors = {
 
     arkanoid: {
