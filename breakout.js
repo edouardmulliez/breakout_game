@@ -8,6 +8,12 @@ if (!Object.construct) {
 }
 
 var Breakout = {
+  STATE: {
+    "BEFORE_LAUNCH": 1,
+    "AFTER_LAUNCH": 2,
+    "FINISHED": 3
+  },
+
   Settings: {
     fillStyle: {
       ball: '#aa0308',
@@ -18,8 +24,9 @@ var Breakout = {
       board: 'black'
     },
     font: {
-      level: '18px Arial',
-      score: 'bold 18px Arial'
+      level:      '18px Arial',
+      score:      'bold 18px Arial',
+      finalScore: 'bold 30px Arial'
     },
   
     ball: {
@@ -46,12 +53,6 @@ var Breakout = {
     initial: {
       lives: 3,
       level: 1
-    },
-
-    STATE: {
-      "BEFORE_LAUNCH": 1,
-      "AFTER_LAUNCH": 2,
-      "FINISHED": 3
     }
   },
 
@@ -84,8 +85,9 @@ var Breakout = {
     this.ball.updateSpeed(this.controls.getSpeed());
     this.lives = this.cfg.initial.lives;
     this.score = 0;
-    this.vscore = 0; 
     this.level = this.controls.getLevel();
+    this.controls.showInstruction();
+    this.controls.enable();
     this.initGameLevel();
   },
 
@@ -125,7 +127,7 @@ var Breakout = {
   
     this.bricks = bricks;
     this.nActiveBricks = nbricks;
-    this.state  = this.cfg.STATE.BEFORE_LAUNCH;
+    this.state  = Breakout.STATE.BEFORE_LAUNCH;
   
     this.display.rerender = true;
   
@@ -137,13 +139,13 @@ var Breakout = {
 
   update: function() {
 
-    if (this.state === this.cfg.STATE.BEFORE_LAUNCH){
+    if (this.state === Breakout.STATE.BEFORE_LAUNCH){
       // Keep the ball centered on the board
       this.ball.x = this.board.x;
       this.ball.y = this.board.y - this.board.height / 2 - this.ball.R / 2 - 2;
     }
   
-    if (this.state === this.cfg.STATE.AFTER_LAUNCH){
+    if (this.state === Breakout.STATE.AFTER_LAUNCH){
   
       // ball on walls
       if (this.ball.x + this.ball.dx + this.ball.R > this.area.right || this.ball.x + this.ball.dx - this.ball.R < this.area.left) {
@@ -180,12 +182,11 @@ var Breakout = {
         this.lives -= 1;
         this.display.rerender = true;
         if (this.lives === 0){
-          this.state = this.cfg.STATE.FINISHED;
-          this.controls.showInstruction();
-          this.controls.enable();
-          this.resetGame();
+          this.state = Breakout.STATE.FINISHED;
+          this.display.vscore = 0;
+          this.rerender = true;
         } else {
-          this.state = this.cfg.STATE.BEFORE_LAUNCH;
+          this.state = Breakout.STATE.BEFORE_LAUNCH;
         }
       }
     }
@@ -201,10 +202,10 @@ var Breakout = {
   },
   
   launchBall: function(){
-    if (this.state === this.cfg.STATE.BEFORE_LAUNCH) {
+    if (this.state === Breakout.STATE.BEFORE_LAUNCH) {
       this.controls.disable();
       this.ball.resetSpeed();
-      this.state = this.cfg.STATE.AFTER_LAUNCH;
+      this.state = Breakout.STATE.AFTER_LAUNCH;
     }
   },
   
@@ -230,10 +231,12 @@ var Breakout = {
   onclick: function(event) {
     event.preventDefault();
     event.stopPropagation();    
-    if (this.state === this.cfg.STATE.BEFORE_LAUNCH){
+    if (this.state === Breakout.STATE.BEFORE_LAUNCH){
       this.controls.hideInstruction();
       this.launchBall();
-    }  
+    } else if (this.state === Breakout.STATE.FINISHED){
+      this.resetGame();
+    }
   },
 
   addListener: function() {
@@ -281,38 +284,40 @@ var Breakout = {
      * (Bricks, score, lives)
      */
     renderSlow: function(ctx) {
-      // bricks
-      for(var i = 0; i < this.game.bricks.length; i++){
-        for(var j = 0; j < this.game.bricks[i].length; j++){
-          this.game.bricks[i][j].draw(ctx);
+      if (this.game.state !== Breakout.STATE.FINISHED) {
+        // bricks
+        for(var i = 0; i < this.game.bricks.length; i++){
+          for(var j = 0; j < this.game.bricks[i].length; j++){
+            this.game.bricks[i][j].draw(ctx);
+          }
         }
-      }
-      // walls
-      ctx.fillStyle = this.fillStyle.wall;
-      ctx.fillRect(0, 0, this.area.left, this.area.bottom);
-      ctx.fillRect(0, 0, this.canvas.width, this.area.top);
-      ctx.fillRect(this.area.right, 0, this.area.left, this.area.bottom);
+        // walls
+        ctx.fillStyle = this.fillStyle.wall;
+        ctx.fillRect(0, 0, this.area.left, this.area.bottom);
+        ctx.fillRect(0, 0, this.canvas.width, this.area.top);
+        ctx.fillRect(this.area.right, 0, this.area.left, this.area.bottom);
 
-      // Lives
-      ctx.fillStyle = this.fillStyle.lives;
-      var lifeItem = {width: this.area.width * 0.07, height: this.area.top * 0.2, xPad: this.area.width * 0.01};
-      for (var i=0; i<this.game.lives; i++){
-        Utils.roundRect(
-          ctx,
-          this.area.left + this.area.width * 0.25 + i * (lifeItem.width + lifeItem.xPad),
-          this.area.top/2 - lifeItem.height/2,
-          lifeItem.width,
-          lifeItem.height, 
-          2, 
-          true);
-      }
+        // Lives
+        ctx.fillStyle = this.fillStyle.lives;
+        var lifeItem = {width: this.area.width * 0.07, height: this.area.top * 0.2, xPad: this.area.width * 0.01};
+        for (var i=0; i<this.game.lives; i++){
+          Utils.roundRect(
+            ctx,
+            this.area.left + this.area.width * 0.25 + i * (lifeItem.width + lifeItem.xPad),
+            this.area.top/2 - lifeItem.height/2,
+            lifeItem.width,
+            lifeItem.height, 
+            2, 
+            true);
+        }
 
-      // Current level
-      ctx.fillStyle = this.fillStyle.level;
-      ctx.font = this.font.level;
-      ctx.textAlign="end";
-      ctx.textBaseline = 'middle';
-      ctx.fillText("Level "+ Utils.pad(this.game.level, 2), this.area.right, this.area.top/2);
+        // Current level
+        ctx.fillStyle = this.fillStyle.level;
+        ctx.font = this.font.level;
+        ctx.textAlign="end";
+        ctx.textBaseline = 'middle';
+        ctx.fillText("Level "+ Utils.pad(this.game.level, 2), this.area.right, this.area.top/2);
+      }
     },
 
     /**
@@ -320,20 +325,32 @@ var Breakout = {
      * (Ball, board, score)
      */
     renderFast: function(ctx) {
-      this.game.ball.draw(ctx);
-      this.game.board.draw(ctx);
-      // Score
-      ctx.fillStyle = this.fillStyle.score;
-      ctx.font = this.font.score;
-      ctx.textBaseline = 'middle';
-      ctx.fillText(Utils.pad(this.vscore, 7), this.area.left, this.area.top/2);
+      if (this.game.state === Breakout.STATE.FINISHED) {
+        this.displayFinalScore(ctx);
+      } else {
+        this.game.ball.draw(ctx);
+        this.game.board.draw(ctx);
+        // Score
+        ctx.fillStyle = this.fillStyle.score;
+        ctx.font = this.font.score;
+        ctx.textBaseline = 'middle';
+        ctx.textAlign = 'left';
+        ctx.fillText(Utils.pad(this.vscore, 7), this.area.left, this.area.top/2);
+      }
     },
 
     updateVscore: function(){
-      // Score with animation (increases progressively)
-      if (this.vscore < this.game.score) {
-        this.vscore = Math.min(this.game.score, this.vscore + 5); 
+      // Score with animation (increases progressively) up to the real score
+      if (this.game.state === Breakout.STATE.FINISHED) {
+        this.vscoreDelta = 500;
+      } else {
+        this.vscoreDelta = 5;
       }
+      // if (this.vscore < this.game.score) {
+        this.vscore = Math.min(this.game.score, this.vscore + this.vscoreDelta); 
+      // } else {
+      //   this.vscore = this.game.score
+      // }
     },
 
     drawGame: function() {
@@ -351,7 +368,19 @@ var Breakout = {
       ctx.drawImage(this.cachedCanvas, 0, 0, this.canvas.width, this.canvas.height);
       // Render fast moving elements
       this.renderFast(ctx);
+    },
+
+    displayFinalScore: function(ctx) {
+      ctx.fillStyle = this.fillStyle.wall;
+      ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      ctx.fillStyle = this.fillStyle.score;
+      ctx.font = this.font.finalScore;
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'center';
+      ctx.fillText("GAME OVER", this.canvas.width / 2, this.canvas.height * 0.4);
+      ctx.fillText(Utils.pad(this.vscore, 7), this.canvas.width / 2, this.canvas.height / 2);
     }
+
   },
 
 
